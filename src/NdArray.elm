@@ -23,6 +23,7 @@ type alias Strides =
 type alias NdArray a =
     { shape : Shape
     , buffer : Buffer a
+    , length : Int
     , offset : Int
     , strides : Strides
     }
@@ -34,11 +35,15 @@ initialize shape buffer =
         strides =
             calculateStrides shape
 
+        length =
+            shapeToLength shape
+
         offset =
             0
     in
         { shape = shape
         , strides = strides
+        , length = length
         , offset = offset
         , buffer = buffer
         }
@@ -50,6 +55,8 @@ toString nda =
         ++ (Basics.toString nda.shape)
         ++ ";strides="
         ++ (Basics.toString nda.strides)
+        ++ ";length="
+        ++ (Basics.toString nda.length)
         ++ ";offset="
         ++ (Basics.toString nda.offset)
 
@@ -60,19 +67,19 @@ bufferToString nda =
 
 
 get : Location -> NdArray a -> Maybe a
-get location nda =
+get loc nda =
     let
         idx =
-            index location nda
+            index loc nda
     in
         Array.get idx nda.buffer
 
 
 set : Location -> a -> NdArray a -> NdArray a
-set location value nda =
+set loc value nda =
     let
         idx =
-            index location nda
+            index loc nda
     in
         if idx >= 0 then
             { nda
@@ -83,25 +90,76 @@ set location value nda =
 
 
 index : Location -> NdArray a -> Int
-index location nda =
+index loc nda =
     let
-        buffLen =
-            Array.length nda.buffer
-    in
-        let
-            locTimesStride =
-                List.map2
-                    (\loc stride -> loc * stride)
-                    location
-                    nda.strides
+        locTimesStride =
+            List.map2
+                (\loc stride -> loc * stride)
+                loc
+                nda.strides
 
-            idx =
-                (List.foldl (+) 0 locTimesStride) + nda.offset
-        in
-            if idx < buffLen then
-                idx
-            else
-                -1
+        idx =
+            (List.foldl (+) 0 locTimesStride) + nda.offset
+    in
+        if idx < nda.length then
+            idx
+        else
+            -1
+
+
+high : Location -> NdArray a -> NdArray a
+high loc nda =
+    let
+        newShape =
+            loc
+
+        newStrides =
+            calculateStrides newShape
+
+        newLength =
+            shapeToLength newShape
+    in
+        { nda
+            | shape = newShape
+            , strides = newStrides
+            , length = newLength
+            , offset = nda.offset
+        }
+
+
+low : Location -> NdArray a -> NdArray a
+low loc nda =
+    let
+        newShape =
+            List.map2
+                (\loc dim -> dim - loc)
+                loc
+                nda.shape
+
+        newStrides =
+            calculateStrides newShape
+
+        newLength =
+            shapeToLength newShape
+
+        locTimesStride =
+            List.map2
+                (\loc stride -> loc * stride)
+                loc
+                nda.strides
+
+        newOffset =
+            List.foldl
+                (\ls acc -> acc + ls)
+                nda.offset
+                locTimesStride
+    in
+        { nda
+            | shape = newShape
+            , strides = newStrides
+            , length = newLength
+            , offset = newOffset
+        }
 
 
 map : (a -> b) -> NdArray a -> NdArray b
@@ -111,42 +169,9 @@ map fn nda =
     }
 
 
-reduce : (a -> b -> b) -> b -> NdArray a -> b
-reduce fn initVal nda =
+foldl : (a -> b -> b) -> b -> NdArray a -> b
+foldl fn initVal nda =
     Array.foldl fn initVal nda.buffer
-
-
-high : Location -> NdArray a -> NdArray a
-high location nda =
-    let
-        newShape =
-            location
-    in
-        { nda
-            | shape = newShape
-            , strides = calculateStrides newShape
-            , offset = nda.offset
-        }
-
-
-low : Location -> NdArray a -> NdArray a
-low location nda =
-    { nda
-        | shape = nda.shape
-        , strides = nda.strides
-        , offset = nda.offset
-    }
-
-
-
-{-
-   transpose : List Int -> NdArray a -> NdArray a
-   transpose shapeIdx nda =
-       { nda
-           | shape = []
-           , strides = []
-       }
--}
 
 
 calculateStrides : Shape -> Strides
@@ -166,3 +191,8 @@ calculateStrides shape =
                 shape
     in
         acc.strides
+
+
+shapeToLength : Shape -> Int
+shapeToLength shape =
+    List.foldr (*) 1 shape

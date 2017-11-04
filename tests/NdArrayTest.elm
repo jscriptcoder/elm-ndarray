@@ -20,7 +20,7 @@ suite =
                         NdArray.initialize [ 2, 3 ] buffer
                 in
                     NdArray.toString nda
-                        |> Expect.equal "NdArray{shape=[2,3];strides=[3,1];offset=0"
+                        |> Expect.equal "NdArray{shape=[2,3];strides=[3,1];length=6;offset=0"
             )
         , test "Getter"
             (\_ ->
@@ -101,5 +101,47 @@ suite =
                 in
                     NdArray.index [ 2, 0, 1 ] nda
                         |> Expect.equal 9
+            )
+        , test "Wrong location"
+            (\_ ->
+                let
+                    buffer =
+                        Array.initialize 12 identity
+
+                    nda =
+                        NdArray.initialize [ 3, 2, 2 ] buffer
+                in
+                    NdArray.index [ 5, 10, 15 ] nda
+                        |> Expect.equal -1
+            )
+        , test "Slicing high"
+            (\_ ->
+                let
+                    buffer =
+                        Array.initialize 16 identity
+
+                    nda =
+                        NdArray.initialize [ 4, 4 ] buffer
+
+                    ndaHigh =
+                        NdArray.high [ 2, 3 ] nda
+                in
+                    NdArray.toString ndaHigh
+                        |> Expect.equal "NdArray{shape=[2,3];strides=[3,1];length=6;offset=0"
+            )
+        , test "Slicing low"
+            (\_ ->
+                let
+                    buffer =
+                        Array.initialize 16 identity
+
+                    nda =
+                        NdArray.initialize [ 4, 4 ] buffer
+
+                    ndaHigh =
+                        NdArray.low [ 2, 3 ] nda
+                in
+                    NdArray.toString ndaHigh
+                        |> Expect.equal "NdArray{shape=[2,1];strides=[1,1];length=2;offset=11"
             )
         ]
