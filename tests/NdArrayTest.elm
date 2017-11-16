@@ -20,7 +20,31 @@ suite =
                         NdArray.initialize [ 2, 3 ] buffer
                 in
                     NdArray.toString nda
-                        |> Expect.equal "NdArray{shape=[2,3];strides=[3,1];length=6;offset=0"
+                        |> Expect.equal "NdArray{shape=[2,3];strides=[3,1];length=6;offset=0}"
+            )
+        , test "Indexing"
+            (\_ ->
+                let
+                    buffer =
+                        Array.initialize 12 identity
+
+                    nda =
+                        NdArray.initialize [ 3, 2, 2 ] buffer
+                in
+                    NdArray.index [ 2, 0, 1 ] nda
+                        |> Expect.equal 9
+            )
+        , test "Wrong location"
+            (\_ ->
+                let
+                    buffer =
+                        Array.initialize 12 identity
+
+                    nda =
+                        NdArray.initialize [ 3, 2, 2 ] buffer
+                in
+                    NdArray.index [ 5, 10, 15 ] nda
+                        |> Expect.equal -1
             )
         , test "Getter"
             (\_ ->
@@ -90,30 +114,6 @@ suite =
                     NdArray.bufferToString newNda
                         |> Expect.equal "[0,1,2,3,4,5]"
             )
-        , test "Indexing"
-            (\_ ->
-                let
-                    buffer =
-                        Array.initialize 12 identity
-
-                    nda =
-                        NdArray.initialize [ 3, 2, 2 ] buffer
-                in
-                    NdArray.index [ 2, 0, 1 ] nda
-                        |> Expect.equal 9
-            )
-        , test "Wrong location"
-            (\_ ->
-                let
-                    buffer =
-                        Array.initialize 12 identity
-
-                    nda =
-                        NdArray.initialize [ 3, 2, 2 ] buffer
-                in
-                    NdArray.index [ 5, 10, 15 ] nda
-                        |> Expect.equal -1
-            )
         , test "Slicing high"
             (\_ ->
                 let
@@ -127,7 +127,7 @@ suite =
                         NdArray.high [ 2, 3 ] nda
                 in
                     NdArray.toString ndaHigh
-                        |> Expect.equal "NdArray{shape=[2,3];strides=[3,1];length=6;offset=0"
+                        |> Expect.equal "NdArray{shape=[2,3];strides=[3,1];length=6;offset=0}"
             )
         , test "Slicing low"
             (\_ ->
@@ -138,10 +138,70 @@ suite =
                     nda =
                         NdArray.initialize [ 4, 4 ] buffer
 
-                    ndaHigh =
+                    ndaLow =
                         NdArray.low [ 2, 3 ] nda
                 in
-                    NdArray.toString ndaHigh
-                        |> Expect.equal "NdArray{shape=[2,1];strides=[1,1];length=2;offset=11"
+                    NdArray.toString ndaLow
+                        |> Expect.equal "NdArray{shape=[2,1];strides=[1,1];length=2;offset=11}"
+            )
+        , test "Reshaping"
+            (\_ ->
+                let
+                    buffer =
+                        Array.initialize 16 identity
+
+                    nda =
+                        NdArray.initialize [ 4, 4 ] buffer
+
+                    reshapedNda =
+                        NdArray.reshape [ 2, 2, 4 ] nda
+                in
+                    NdArray.toString reshapedNda
+                        |> Expect.equal "NdArray{shape=[2,2,4];strides=[8,4,1];length=16;offset=0}"
+            )
+        , test "Transposing"
+            (\_ ->
+                let
+                    buffer =
+                        Array.initialize 24 identity
+
+                    nda =
+                        NdArray.initialize [ 2, 3, 4 ] buffer
+
+                    transposedNda =
+                        NdArray.transpose [ 0, 2, 1 ] nda
+                in
+                    NdArray.toString transposedNda
+                        |> Expect.equal "NdArray{shape=[2,4,3];strides=[12,1,4];length=24;offset=0}"
+            )
+        , test "Mapping"
+            (\_ ->
+                let
+                    buffer =
+                        Array.initialize 6 identity
+
+                    nda =
+                        NdArray.initialize [ 3, 2 ] buffer
+
+                    mappedNda =
+                        NdArray.map (\val -> (val + 1) ^ 2) nda
+                in
+                    NdArray.bufferToString mappedNda
+                        |> Expect.equal "[1,4,9,16,25,36]"
+            )
+        , test "Folding"
+            (\_ ->
+                let
+                    buffer =
+                        Array.initialize 6 identity
+
+                    nda =
+                        NdArray.initialize [ 3, 2 ] buffer
+
+                    foldedVal =
+                        NdArray.fold (\val acc -> val + acc) 0 nda
+                in
+                    foldedVal
+                        |> Expect.equal 15
             )
         ]
