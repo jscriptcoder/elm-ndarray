@@ -144,6 +144,36 @@ suite =
                     NdArray.toString ndaLow
                         |> Expect.equal "NdArray{shape=[2,1];strides=[1,1];length=2;offset=11}"
             )
+        , test "Stepping"
+            (\_ ->
+                let
+                    buffer =
+                        Array.initialize 9 identity
+
+                    nda =
+                        NdArray.initialize [ 3, 3 ] buffer
+
+                    ndaStep =
+                        NdArray.step [ 2, 2 ] nda
+                in
+                    NdArray.toString ndaStep
+                        |> Expect.equal "NdArray{shape=[2,2];strides=[6,2];length=4;offset=0}"
+            )
+        , test "Stepping backwards"
+            (\_ ->
+                let
+                    buffer =
+                        Array.initialize 9 identity
+
+                    nda =
+                        NdArray.initialize [ 3, 3 ] buffer
+
+                    ndaStep =
+                        NdArray.step [ -1, 1 ] nda
+                in
+                    NdArray.toString ndaStep
+                        |> Expect.equal "NdArray{shape=[3,3];strides=[-3,1];length=9;offset=6}"
+            )
         , test "Reshaping"
             (\_ ->
                 let

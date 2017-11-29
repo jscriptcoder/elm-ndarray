@@ -13,12 +13,11 @@ module NdArray
         , index
         , high
         , low
+        , step
         , reshape
         , transpose
-          {-
-             , map
-             , fold
-          -}
+        , map
+        , fold
         )
 
 import Array exposing (..)
