@@ -174,34 +174,4 @@ suite =
                     NdArray.toString transposedNda
                         |> Expect.equal "NdArray{shape=[2,4,3];strides=[12,1,4];length=24;offset=0}"
             )
-        , test "Mapping"
-            (\_ ->
-                let
-                    buffer =
-                        Array.initialize 6 identity
-
-                    nda =
-                        NdArray.initialize [ 3, 2 ] buffer
-
-                    mappedNda =
-                        NdArray.map (\val -> (val + 1) ^ 2) nda
-                in
-                    NdArray.bufferToString mappedNda
-                        |> Expect.equal "[1,4,9,16,25,36]"
-            )
-        , test "Folding"
-            (\_ ->
-                let
-                    buffer =
-                        Array.initialize 6 identity
-
-                    nda =
-                        NdArray.initialize [ 3, 2 ] buffer
-
-                    foldedVal =
-                        NdArray.fold (\val acc -> val + acc) 0 nda
-                in
-                    foldedVal
-                        |> Expect.equal 15
-            )
         ]
