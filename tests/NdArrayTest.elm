@@ -174,6 +174,21 @@ suite =
                     NdArray.toString ndaStep
                         |> Expect.equal "NdArray{shape=[3,3];strides=[-3,1];length=9;offset=6}"
             )
+        , test "Picking"
+            (\_ ->
+                let
+                    buffer =
+                        Array.initialize 16 identity
+
+                    nda =
+                        NdArray.initialize [ 2, 4, 2 ] buffer
+
+                    ndaPick =
+                        NdArray.pick [ Nothing, Nothing, Just 0 ] nda
+                in
+                    NdArray.toString ndaPick
+                        |> Expect.equal "NdArray{shape=[2,4];strides=[8,2];length=8;offset=0}"
+            )
         , test "Reshaping"
             (\_ ->
                 let

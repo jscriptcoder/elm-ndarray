@@ -14,6 +14,7 @@ module NdArray
         , high
         , low
         , step
+        , pick
         , reshape
         , transpose
         , map
@@ -412,6 +413,91 @@ step steps nda =
 
 
 
+{-
+   function View3darray_pick(i0, i1, i2) {
+       var a = [],
+           b = [],
+           c = this.offset;
+
+       if (typeof i0 === 'number' && i0 >= 0) {
+           c = (c + this.stride[0] * i0) | 0
+       } else {
+           a.push(this.shape[0]);
+           b.push(this.stride[0]);
+       }
+
+       if (typeof i1 === 'number' && i1 >= 0) {
+           c = (c + this.stride[1] * i1) | 0
+       } else {
+           a.push(this.shape[1]);
+           b.push(this.stride[1]);
+       }
+
+       if (typeof i2 === 'number' && i2 >= 0) {
+           c = (c + this.stride[2] * i2) | 0
+       } else {
+           a.push(this.shape[2]);
+           b.push(this.stride[2]);
+       }
+
+       var ctor = CTOR_LIST[a.length + 1];
+       return ctor(this.data, a, b, c);
+   }
+-}
+
+
+pick : List (Maybe Int) -> NdArray a -> NdArray a
+pick picks nda =
+    let
+        ( auxShape, auxStrides ) =
+            List.map3
+                (\pick stride dim ->
+                    case pick of
+                        Just dim ->
+                            ( 0, 0 )
+
+                        Nothing ->
+                            ( dim, stride )
+                )
+                picks
+                nda.strides
+                nda.shape
+                |> List.unzip
+
+        newShape =
+            List.filter (\dim -> dim /= 0) auxShape
+
+        newStrides =
+            List.filter (\stride -> stride /= 0) auxStrides
+
+        newLength =
+            shapeToLength newShape
+
+        sumOffset =
+            List.map2
+                (\pick stride ->
+                    case pick of
+                        Just pick ->
+                            nda.offset + stride * pick
+
+                        Nothing ->
+                            0
+                )
+                picks
+                nda.strides
+
+        newOffset =
+            List.foldl (+) nda.offset sumOffset
+    in
+        { nda
+            | shape = newShape
+            , strides = newStrides
+            , length = newLength
+            , offset = newOffset
+        }
+
+
+
 {- TODO -}
 
 
@@ -532,7 +618,7 @@ shapeToLength shape =
 permuteValues indexes resultList arrList =
     case indexes of
         [] ->
-            resultList
+            List.reverse resultList
 
         idx :: tailList ->
             let
@@ -543,7 +629,7 @@ permuteValues indexes resultList arrList =
                     Just value ->
                         let
                             newResultList =
-                                List.append resultList [ value ]
+                                value :: resultList
                         in
                             permuteValues tailList newResultList arrList
 
