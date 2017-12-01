@@ -104,8 +104,8 @@ bufferToString nda =
 {- TODO -}
 
 
-dataToString : NdArray a -> String
-dataToString nda =
+viewToString : NdArray a -> String
+viewToString nda =
     Debug.crash "TODO"
 
 
