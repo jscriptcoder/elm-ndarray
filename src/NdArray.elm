@@ -8,6 +8,7 @@ module NdArray
         , initialize
         , toString
         , bufferToString
+        , viewToString
         , get
         , set
         , index
@@ -106,15 +107,13 @@ bufferToString nda =
 
 viewToString : NdArray a -> String
 viewToString nda =
-    Debug.crash "TODO"
+    fold (\val acc -> val :: acc) [] nda
+        |> List.reverse
+        |> Basics.toString
 
 
 
-{-
-   function View3darray_index(i0, i1, i2) {
-     return this.offset + this.stride[0] * i0 + this.stride[1] * i1 + this.stride[2] * i2;
-   }
--}
+{- TODO -}
 
 
 index : Location -> NdArray a -> Int
@@ -136,12 +135,7 @@ index loc nda =
 
 
 
-{-
-   function View3darray_get(i0, i1, i2) {
-     var idx = View3darray_index(i0, i1, i2);
-     return this.data[idx];
-   }
--}
+{- TODO -}
 
 
 get : Location -> NdArray a -> Maybe a
@@ -154,12 +148,7 @@ get loc nda =
 
 
 
-{-
-   function View3darray_set(i0, i1, i2, v) {
-     var idx = View3darray_index(i0, i1, i2),
-     return this.data[idx] = v;
-   }
--}
+{- TODO -}
 
 
 set : Location -> a -> NdArray a -> NdArray a
@@ -172,24 +161,7 @@ set loc value nda =
 
 
 
-{-
-   function View3darray_hi(i0, i1, i2) {
-       i0 = (typeof i0 !== 'number' || i0 < 0) ? this.shape[0] : i0 | 0;
-       i1 = (typeof i1 !== 'number' || i1 < 0) ? this.shape[1] : i1 | 0;
-       i2 = (typeof i2 !== 'number' || i2 < 0) ? this.shape[2] : i2 | 0;
-
-       return new View3darray(
-           this.data,
-           i0,
-           i1,
-           i2,
-           this.stride[0],
-           this.stride[1],
-           this.stride[2],
-           this.offset
-       );
-   }
--}
+{- TODO -}
 
 
 high : Location -> NdArray a -> NdArray a
@@ -221,47 +193,7 @@ high loc nda =
 
 
 
-{-
-   function View3darray_lo(i0, i1, i2) {
-       var b = this.offset,
-           d = 0,
-           a0 = this.shape[0],
-           a1 = this.shape[1],
-           a2 = this.shape[2],
-           c0 = this.stride[0],
-           c1 = this.stride[1],
-           c2 = this.stride[2];
-
-       if (typeof i0 === 'number' && i0 >= 0) {
-           d = i0 | 0;
-           b += c0 * d;
-           a0 -= d;
-       }
-
-       if (typeof i1 === 'number' && i1 >= 0) {
-           d = i1 | 0;
-           b += c1 * d;
-           a1 -= d;
-       }
-
-       if (typeof i2 === 'number' && i2 >= 0) {
-           d = i2 | 0;
-           b += c2 * d;
-           a2 -= d;
-       }
-
-       return new View3darray(
-         this.data,
-         a0,
-         a1,
-         a2,
-         c0,
-         c1,
-         c2,
-         b
-       )
-   }
--}
+{- TODO -}
 
 
 low : Location -> NdArray a -> NdArray a
@@ -310,54 +242,7 @@ low loc nda =
 
 
 
-{-
-   function View3darray_step(i0, i1, i2) {
-       var a0 = this.shape[0],
-           a1 = this.shape[1],
-           a2 = this.shape[2],
-           b0 = this.stride[0],
-           b1 = this.stride[1],
-           b2 = this.stride[2],
-           c = this.offset,
-           d = 0,
-           ceil = Math.ceil;
-
-       if (typeof i0 === 'number') {
-           d = i0 | 0;
-           if (d < 0) {
-               c += b0 * (a0 - 1);
-               a0 = ceil(-a0 / d)
-           } else {
-               a0 = ceil(a0 / d)
-           }
-           b0 *= d
-       }
-
-       if (typeof i1 === 'number') {
-           d = i1 | 0;
-           if (d < 0) {
-               c += b1 * (a1 - 1);
-               a1 = ceil(-a1 / d)
-           } else {
-               a1 = ceil(a1 / d)
-           }
-           b1 *= d
-       }
-
-       if (typeof i2 === 'number') {
-           d = i2 | 0;
-           if (d < 0) {
-               c += b2 * (a2 - 1);
-               a2 = ceil(-a2 / d)
-           } else {
-               a2 = ceil(a2 / d)
-           }
-           b2 *= d
-       }
-
-       return new View3darray(this.data, a0, a1, a2, b0, b1, b2, c);
-   }
--}
+{- TODO -}
 
 
 step : List Int -> NdArray a -> NdArray a
@@ -413,37 +298,7 @@ step steps nda =
 
 
 
-{-
-   function View3darray_pick(i0, i1, i2) {
-       var a = [],
-           b = [],
-           c = this.offset;
-
-       if (typeof i0 === 'number' && i0 >= 0) {
-           c = (c + this.stride[0] * i0) | 0
-       } else {
-           a.push(this.shape[0]);
-           b.push(this.stride[0]);
-       }
-
-       if (typeof i1 === 'number' && i1 >= 0) {
-           c = (c + this.stride[1] * i1) | 0
-       } else {
-           a.push(this.shape[1]);
-           b.push(this.stride[1]);
-       }
-
-       if (typeof i2 === 'number' && i2 >= 0) {
-           c = (c + this.stride[2] * i2) | 0
-       } else {
-           a.push(this.shape[2]);
-           b.push(this.stride[2]);
-       }
-
-       var ctor = CTOR_LIST[a.length + 1];
-       return ctor(this.data, a, b, c);
-   }
--}
+{- TODO -}
 
 
 pick : List (Maybe Int) -> NdArray a -> NdArray a
@@ -518,27 +373,7 @@ reshape newShape nda =
 
 
 
-{-
-   function View3darray_transpose(i0, i1, i2) {
-       i0 = (i0 === undefined ? 0 : i0 | 0);
-       i1 = (i1 === undefined ? 1 : i1 | 0);
-       i2 = (i2 === undefined ? 2 : i2 | 0);
-
-       var a = this.shape,
-           b = this.stride;
-
-       return new View3darray(
-         this.data,
-         a[i0],
-         a[i1],
-         a[i2],
-         b[i0],
-         b[i1],
-         b[i2],
-         this.offset
-       )
-   }
--}
+{- TODO -}
 
 
 transpose : List Int -> NdArray a -> NdArray a
@@ -574,8 +409,11 @@ map fn nda =
 
         initialLoc =
             List.repeat ndim 0
+
+        buffer =
+            Array.empty
     in
-        nda
+        mapWithLocation fn initialLoc buffer nda
 
 
 
@@ -589,20 +427,13 @@ fold fn initVal nda =
             List.length nda.shape
 
         initialLoc =
-            List.repeat 0 ndim
+            List.repeat ndim 0
     in
-        folding fn initVal (Just initialLoc) nda
+        foldWithLocation fn initVal initialLoc nda
 
 
 
 -- Helpers --
-{-
-   stride = new Array(d)
-   for(var i=d-1, sz=1; i>=0; --i) {
-     stride[i] = sz
-     sz *= shape[i]
-   }
--}
 
 
 calculateStrides : Shape -> Strides
@@ -651,42 +482,79 @@ permuteValues indexes resultList arrList =
                         permuteValues [] resultList arrList
 
 
-nextLocation : Location -> Shape -> Location
-nextLocation location shape =
+nextLocation : Location -> Shape -> Maybe Location
+nextLocation loc shape =
     let
-        increment : ( Int, Int ) -> ( Location, Boolean ) -> Maybe Location
-        increment ( idx, dim ) ( locationAcc, shouldInc ) =
+        increment : ( Int, Int ) -> ( Location, Bool ) -> ( Location, Bool )
+        increment ( idx, dim ) ( locAcc, shouldInc ) =
             if shouldInc then
                 if idx + 1 < dim then
-                    ( idx + 1 :: locationAcc, False )
+                    ( idx + 1 :: locAcc, False )
                 else
-                    ( 0 :: locationAcc, True )
+                    ( 0 :: locAcc, True )
             else
-                ( idx :: locationAcc, False )
+                ( idx :: locAcc, False )
 
-        newLocation =
-            List.map2 (,) location shape
+        newLoc =
+            List.map2 (,) loc shape
                 |> List.foldr increment ( [], True )
     in
-        if Tuple.second newLocation then
+        if Tuple.second newLoc then
             Nothing
         else
-            Just (Tuple.first newLocation)
+            Just (Tuple.first newLoc)
 
 
-folding fn acc maybeLoc nda =
-    case maybeLoc of
-        Just loc ->
-            let
-                maybeVal =
-                    get loc nda
-            in
-                case maybeVal of
-                    Just val ->
-                        folding fn (fn val acc) (nextLocation loc) nda
+foldWithLocation : (a -> b -> b) -> b -> Location -> NdArray a -> b
+foldWithLocation fn acc loc nda =
+    let
+        maybeVal =
+            get loc nda
+    in
+        case maybeVal of
+            Just val ->
+                let
+                    newVal =
+                        fn val acc
 
-                    Nothing ->
-                        acc
+                    maybeNextLoc =
+                        nextLocation loc nda.shape
+                in
+                    case maybeNextLoc of
+                        Just nextLoc ->
+                            foldWithLocation fn newVal nextLoc nda
 
-        Nothing ->
-            acc
+                        Nothing ->
+                            newVal
+
+            Nothing ->
+                acc
+
+
+mapWithLocation : (a -> b) -> Location -> Buffer b -> NdArray a -> NdArray b
+mapWithLocation fn loc buffer nda =
+    let
+        maybeVal =
+            get loc nda
+    in
+        case maybeVal of
+            Just val ->
+                let
+                    newVal =
+                        fn val
+
+                    newBuffer =
+                        Array.push newVal buffer
+
+                    maybeNextLoc =
+                        nextLocation loc nda.shape
+                in
+                    case maybeNextLoc of
+                        Just nextLoc ->
+                            mapWithLocation fn nextLoc newBuffer nda
+
+                        Nothing ->
+                            initialize nda.shape newBuffer
+
+            Nothing ->
+                initialize nda.shape buffer
