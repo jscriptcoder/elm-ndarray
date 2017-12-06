@@ -219,4 +219,18 @@ suite =
                     NdArray.toString transposedNda
                         |> Expect.equal "NdArray{shape=[2,4,3];strides=[12,1,4];length=24;offset=0}"
             )
+        , test "Folding"
+            (\_ ->
+                let
+                    buffer =
+                        Array.initialize 6 identity
+
+                    nda =
+                        NdArray.initialize [ 2, 3 ] buffer
+
+                    foldedVal =
+                        NdArray.fold (\val acc -> val + acc) 0 nda
+                in
+                    Expect.equal foldedVal 21
+            )
         ]

@@ -568,7 +568,14 @@ transpose axes nda =
 
 map : (a -> b) -> NdArray a -> NdArray b
 map fn nda =
-    Debug.crash "TODO"
+    let
+        ndim =
+            List.length nda.shape
+
+        initialLoc =
+            List.repeat ndim 0
+    in
+        nda
 
 
 
@@ -577,7 +584,14 @@ map fn nda =
 
 fold : (a -> b -> b) -> b -> NdArray a -> b
 fold fn initVal nda =
-    Debug.crash "TODO"
+    let
+        ndim =
+            List.length nda.shape
+
+        initialLoc =
+            List.repeat 0 ndim
+    in
+        folding fn initVal (Just initialLoc) nda
 
 
 
@@ -635,3 +649,44 @@ permuteValues indexes resultList arrList =
 
                     Nothing ->
                         permuteValues [] resultList arrList
+
+
+nextLocation : Location -> Shape -> Location
+nextLocation location shape =
+    let
+        increment : ( Int, Int ) -> ( Location, Boolean ) -> Maybe Location
+        increment ( idx, dim ) ( locationAcc, shouldInc ) =
+            if shouldInc then
+                if idx + 1 < dim then
+                    ( idx + 1 :: locationAcc, False )
+                else
+                    ( 0 :: locationAcc, True )
+            else
+                ( idx :: locationAcc, False )
+
+        newLocation =
+            List.map2 (,) location shape
+                |> List.foldr increment ( [], True )
+    in
+        if Tuple.second newLocation then
+            Nothing
+        else
+            Just (Tuple.first newLocation)
+
+
+folding fn acc maybeLoc nda =
+    case maybeLoc of
+        Just loc ->
+            let
+                maybeVal =
+                    get loc nda
+            in
+                case maybeVal of
+                    Just val ->
+                        folding fn (fn val acc) (nextLocation loc) nda
+
+                    Nothing ->
+                        acc
+
+        Nothing ->
+            acc
