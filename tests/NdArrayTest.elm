@@ -34,18 +34,6 @@ suite =
                     NdArray.index [ 2, 0, 1 ] nda
                         |> Expect.equal 9
             )
-        , test "Wrong location"
-            (\_ ->
-                let
-                    buffer =
-                        Array.initialize 12 identity
-
-                    nda =
-                        NdArray.initialize [ 3, 2, 2 ] buffer
-                in
-                    NdArray.index [ 5, 10, 15 ] nda
-                        |> Expect.equal -1
-            )
         , test "Getter"
             (\_ ->
                 let
@@ -127,7 +115,7 @@ suite =
                         NdArray.high [ 2, 3 ] nda
                 in
                     NdArray.toString ndaHigh
-                        |> Expect.equal "NdArray{shape=[2,3];strides=[3,1];length=6;offset=0}"
+                        |> Expect.equal "NdArray{shape=[2,3];strides=[4,1];length=6;offset=0}"
             )
         , test "Slicing high - view"
             (\_ ->
@@ -157,7 +145,7 @@ suite =
                         NdArray.low [ 2, 3 ] nda
                 in
                     NdArray.toString ndaLow
-                        |> Expect.equal "NdArray{shape=[2,1];strides=[1,1];length=2;offset=11}"
+                        |> Expect.equal "NdArray{shape=[2,1];strides=[4,1];length=2;offset=11}"
             )
         , test "Slicing low - view"
             (\_ ->
@@ -263,6 +251,24 @@ suite =
                 in
                     NdArray.bufferToString mappedNda
                         |> Expect.equal "[0,2,4,6,8,10,12,14,16,18,20,22,24,26,28,30]"
+            )
+        , test "Slicing and Mapping"
+            (\_ ->
+                let
+                    buffer =
+                        Array.initialize 16 identity
+
+                    nda =
+                        NdArray.initialize [ 4, 4 ] buffer
+
+                    ndaLow =
+                        NdArray.low [ 2, 3 ] nda
+
+                    mappedNda =
+                        NdArray.map (\val -> val + 3) ndaLow
+                in
+                    NdArray.viewToString mappedNda
+                        |> Expect.equal "[14,18]"
             )
         , test "Folding"
             (\_ ->

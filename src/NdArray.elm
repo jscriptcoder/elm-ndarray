@@ -124,14 +124,8 @@ index loc nda =
                 (\loc stride -> loc * stride)
                 loc
                 nda.strides
-
-        idx =
-            (List.foldl (+) nda.offset locTimesStride)
     in
-        if idx < nda.length then
-            idx
-        else
-            -1
+        List.foldl (+) nda.offset locTimesStride
 
 
 
@@ -178,17 +172,12 @@ high loc nda =
                 loc
                 nda.shape
 
-        newStrides =
-            calculateStrides newShape
-
         newLength =
             shapeToLength newShape
     in
         { nda
             | shape = newShape
-            , strides = newStrides
             , length = newLength
-            , offset = nda.offset
         }
 
 
@@ -227,15 +216,11 @@ low loc nda =
                 nda.offset
                 locTimesStride
 
-        newStrides =
-            calculateStrides newShape
-
         newLength =
             shapeToLength newShape
     in
         { nda
             | shape = newShape
-            , strides = newStrides
             , length = newLength
             , offset = newOffset
         }
@@ -505,32 +490,6 @@ nextLocation loc shape =
             Just (Tuple.first newLoc)
 
 
-foldWithLocation : (a -> b -> b) -> b -> Location -> NdArray a -> b
-foldWithLocation fn acc loc nda =
-    let
-        maybeVal =
-            get loc nda
-    in
-        case maybeVal of
-            Just val ->
-                let
-                    newVal =
-                        fn val acc
-
-                    maybeNextLoc =
-                        nextLocation loc nda.shape
-                in
-                    case maybeNextLoc of
-                        Just nextLoc ->
-                            foldWithLocation fn newVal nextLoc nda
-
-                        Nothing ->
-                            newVal
-
-            Nothing ->
-                acc
-
-
 mapWithLocation : (a -> b) -> Location -> Buffer b -> NdArray a -> NdArray b
 mapWithLocation fn loc buffer nda =
     let
@@ -558,3 +517,29 @@ mapWithLocation fn loc buffer nda =
 
             Nothing ->
                 initialize nda.shape buffer
+
+
+foldWithLocation : (a -> b -> b) -> b -> Location -> NdArray a -> b
+foldWithLocation fn acc loc nda =
+    let
+        maybeVal =
+            get loc nda
+    in
+        case maybeVal of
+            Just val ->
+                let
+                    newVal =
+                        fn val acc
+
+                    maybeNextLoc =
+                        nextLocation loc nda.shape
+                in
+                    case maybeNextLoc of
+                        Just nextLoc ->
+                            foldWithLocation fn newVal nextLoc nda
+
+                        Nothing ->
+                            newVal
+
+            Nothing ->
+                acc
