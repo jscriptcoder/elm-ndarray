@@ -29,9 +29,13 @@
             ctx.drawImage(img, 0, 0);
 
             const data = ctx.getImageData(0, 0, img.width, img.height);
-            const arr = Array.from(data.data);
+            const arrBuffer = Array.from(data.data);
 
-            app.ports.jsArray.send(arr);
+            app.ports.jsArray.send({
+              arrBuffer,
+              width: img.width,
+              height: img.height
+            });
           };
           img.src = URL.createObjectURL(file);
         }

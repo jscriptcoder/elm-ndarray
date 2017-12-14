@@ -8304,6 +8304,9 @@ var _user$project$NdArray$initialize = F2(
 		var strides = _user$project$NdArray$calculateStrides(shape);
 		return {shape: shape, strides: strides, length: length, offset: offset, buffer: buffer};
 	});
+var _user$project$NdArray$empty = function (shape) {
+	return A2(_user$project$NdArray$initialize, shape, _elm_lang$core$Array$empty);
+};
 var _user$project$NdArray$mapWithLocation = F4(
 	function (fn, loc, buffer, nda) {
 		mapWithLocation:
@@ -8352,19 +8355,68 @@ var _user$project$Main$view = function (model) {
 		{
 			ctor: '::',
 			_0: _elm_lang$html$Html$text(
-				_elm_lang$core$Basics$toString(model)),
+				_user$project$NdArray$toString(model)),
 			_1: {ctor: '[]'}
 		});
 };
 var _user$project$Main$update = F2(
 	function (msg, model) {
 		var _p0 = msg;
-		return {ctor: '_Tuple2', _0: _p0._0, _1: _elm_lang$core$Platform_Cmd$none};
+		var _p1 = _p0._0;
+		var newModel = A2(
+			_user$project$NdArray$initialize,
+			{
+				ctor: '::',
+				_0: _p1.height,
+				_1: {
+					ctor: '::',
+					_0: _p1.width,
+					_1: {ctor: '[]'}
+				}
+			},
+			_p1.arrBuffer);
+		return {ctor: '_Tuple2', _0: newModel, _1: _elm_lang$core$Platform_Cmd$none};
 	});
-var _user$project$Main$init = {ctor: '_Tuple2', _0: _elm_lang$core$Array$empty, _1: _elm_lang$core$Platform_Cmd$none};
+var _user$project$Main$init = {
+	ctor: '_Tuple2',
+	_0: _user$project$NdArray$empty(
+		{
+			ctor: '::',
+			_0: 0,
+			_1: {
+				ctor: '::',
+				_0: 0,
+				_1: {ctor: '[]'}
+			}
+		}),
+	_1: _elm_lang$core$Platform_Cmd$none
+};
 var _user$project$Main$jsArray = _elm_lang$core$Native_Platform.incomingPort(
 	'jsArray',
-	_elm_lang$core$Json_Decode$array(_elm_lang$core$Json_Decode$int));
+	A2(
+		_elm_lang$core$Json_Decode$andThen,
+		function (arrBuffer) {
+			return A2(
+				_elm_lang$core$Json_Decode$andThen,
+				function (width) {
+					return A2(
+						_elm_lang$core$Json_Decode$andThen,
+						function (height) {
+							return _elm_lang$core$Json_Decode$succeed(
+								{arrBuffer: arrBuffer, width: width, height: height});
+						},
+						A2(_elm_lang$core$Json_Decode$field, 'height', _elm_lang$core$Json_Decode$int));
+				},
+				A2(_elm_lang$core$Json_Decode$field, 'width', _elm_lang$core$Json_Decode$int));
+		},
+		A2(
+			_elm_lang$core$Json_Decode$field,
+			'arrBuffer',
+			_elm_lang$core$Json_Decode$array(_elm_lang$core$Json_Decode$int))));
+var _user$project$Main$Data = F3(
+	function (a, b, c) {
+		return {arrBuffer: a, width: b, height: c};
+	});
 var _user$project$Main$OnImage = function (a) {
 	return {ctor: 'OnImage', _0: a};
 };

@@ -3,14 +3,22 @@ port module Main exposing (..)
 import Html exposing (..)
 import Html.Events exposing (..)
 import Array exposing (..)
-import NdArray
+import NdArray exposing (NdArray)
+
+
+type alias Data =
+    { arrBuffer : Array Int
+    , width : Int
+    , height : Int
+    }
+
 
 
 -- Msg
 
 
 type Msg
-    = OnImage Model
+    = OnImage Data
 
 
 
@@ -18,23 +26,18 @@ type Msg
 
 
 type alias Model =
-    Array Int
+    NdArray Int
 
 
 init : ( Model, Cmd Msg )
 init =
-    ( Array.empty, Cmd.none )
+    ( NdArray.empty [ 0, 0 ]
+    , Cmd.none
+    )
 
 
 
--- UPDATE
-
-
-update : Msg -> Model -> ( Model, Cmd Msg )
-update msg model =
-    case msg of
-        OnImage buffer ->
-            ( buffer, Cmd.none )
+-- MAIN
 
 
 main =
@@ -47,20 +50,37 @@ main =
 
 
 
+-- UPDATE
+
+
+update : Msg -> Model -> ( Model, Cmd Msg )
+update msg model =
+    case msg of
+        OnImage data ->
+            let
+                newModel =
+                    NdArray.initialize
+                        [ data.height, data.width ]
+                        data.arrBuffer
+            in
+                ( newModel, Cmd.none )
+
+
+
 -- VIEW
 
 
 view : Model -> Html Msg
 view model =
     div []
-        [ text (toString model) ]
+        [ text (NdArray.toString model) ]
 
 
 
 -- SUBSCRIPTIONS
 
 
-port jsArray : (Array Int -> msg) -> Sub msg
+port jsArray : (Data -> msg) -> Sub msg
 
 
 subscriptions : Model -> Sub Msg
