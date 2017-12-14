@@ -1,110 +1,68 @@
-module Main exposing (main)
+port module Main exposing (..)
 
 import Html exposing (..)
-import Html.Attributes exposing (..)
-import Html.Events exposing (onClick)
-import Json.Decode as Json exposing (Value)
-import Task
-import FileReader exposing (NativeFile, FileContentArrayBuffer)
+import Html.Events exposing (..)
+import Array exposing (..)
+import NdArray
 
 
-type alias Model =
-    { file : Maybe NativeFile
-    , content : Maybe FileContentArrayBuffer
-    }
-
-
-init : Model
-init =
-    { file = Nothing
-    , content = Nothing
-    }
+-- Msg
 
 
 type Msg
-    = OnFileContent (Result FileReader.Error FileContentArrayBuffer)
-    | FileChange (List NativeFile)
-    | NoOp
+    = OnImage Model
+
+
+
+-- MODEL
+
+
+type alias Model =
+    Array Int
+
+
+init : ( Model, Cmd Msg )
+init =
+    ( Array.empty, Cmd.none )
+
+
+
+-- UPDATE
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
-update message model =
-    case message of
-        OnFileContent res ->
-            case res of
-                Ok content ->
-                    ( { model | content = Just content }, Cmd.none )
+update msg model =
+    case msg of
+        OnImage buffer ->
+            ( buffer, Cmd.none )
 
-                Err err ->
-                    Debug.crash (toString err)
 
-        FileChange file ->
-            case file of
-                -- Only handling case of a single file
-                [ f ] ->
-                    ( { model | file = Just f }, getFileContents f )
+main =
+    program
+        { init = init
+        , view = view
+        , update = update
+        , subscriptions = subscriptions
+        }
 
-                _ ->
-                    ( model, Cmd.none )
 
-        _ ->
-            ( model, Cmd.none )
+
+-- VIEW
 
 
 view : Model -> Html Msg
 view model =
-    div [ class "panel" ] <|
-        [ h1 [] [ text "File Reader library example" ]
-        , p [] [ text "Use the file dialog to load file" ]
-        , div []
-            [ input
-                [ type_ "file"
-                , FileReader.onFileChange FileChange
-                , multiple False
-                ]
-                []
-            ]
-        , case model.file of
-            Just nf ->
-                div []
-                    [ h3 [] [ text nf.name ]
-                    , textarea
-                        []
-                        [ case model.content of
-                            Just cf ->
-                                cf
-                                    |> toString
-                                    |> text
-
-                            Nothing ->
-                                text ""
-                        ]
-                    ]
-
-            Nothing ->
-                text ""
-        ]
+    div []
+        [ text (toString model) ]
 
 
 
---
+-- SUBSCRIPTIONS
 
 
-getFileContents : NativeFile -> Cmd Msg
-getFileContents nf =
-    FileReader.readAsArrayBuffer nf.blob
-        |> Task.attempt OnFileContent
+port jsArray : (Array Int -> msg) -> Sub msg
 
 
-
---
-
-
-main : Program Never Model Msg
-main =
-    Html.program
-        { init = ( init, Cmd.none )
-        , update = update
-        , view = view
-        , subscriptions = always Sub.none
-        }
+subscriptions : Model -> Sub Msg
+subscriptions model =
+    jsArray OnImage
