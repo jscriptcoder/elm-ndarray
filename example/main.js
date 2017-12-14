@@ -9444,14 +9444,14 @@ var _simonh1000$file_reader$FileReader$readAsTextFile = function (fileRef) {
 var _simonh1000$file_reader$FileReader$ReadFail = {ctor: 'ReadFail'};
 var _simonh1000$file_reader$FileReader$NoValidBlob = {ctor: 'NoValidBlob'};
 
-var _user$project$Main$init = {file: _elm_lang$core$Maybe$Nothing, content: ''};
+var _user$project$Main$init = {file: _elm_lang$core$Maybe$Nothing, content: _elm_lang$core$Maybe$Nothing};
 var _user$project$Main$Model = F2(
 	function (a, b) {
 		return {file: a, content: b};
 	});
 var _user$project$Main$NoOp = {ctor: 'NoOp'};
-var _user$project$Main$Fran = function (a) {
-	return {ctor: 'Fran', _0: a};
+var _user$project$Main$FileChange = function (a) {
+	return {ctor: 'FileChange', _0: a};
 };
 var _user$project$Main$view = function (model) {
 	return A2(
@@ -9495,7 +9495,7 @@ var _user$project$Main$view = function (model) {
 									_0: _elm_lang$html$Html_Attributes$type_('file'),
 									_1: {
 										ctor: '::',
-										_0: _simonh1000$file_reader$FileReader$onFileChange(_user$project$Main$Fran),
+										_0: _simonh1000$file_reader$FileReader$onFileChange(_user$project$Main$FileChange),
 										_1: {
 											ctor: '::',
 											_0: _elm_lang$html$Html_Attributes$multiple(false),
@@ -9517,7 +9517,7 @@ var _user$project$Main$view = function (model) {
 									{
 										ctor: '::',
 										_0: A2(
-											_elm_lang$html$Html$span,
+											_elm_lang$html$Html$h3,
 											{ctor: '[]'},
 											{
 												ctor: '::',
@@ -9527,18 +9527,19 @@ var _user$project$Main$view = function (model) {
 										_1: {
 											ctor: '::',
 											_0: A2(
-												_elm_lang$html$Html$div,
+												_elm_lang$html$Html$textarea,
 												{ctor: '[]'},
 												{
 													ctor: '::',
-													_0: A2(
-														_elm_lang$html$Html$small,
-														{ctor: '[]'},
-														{
-															ctor: '::',
-															_0: _elm_lang$html$Html$text(model.content),
-															_1: {ctor: '[]'}
-														}),
+													_0: function () {
+														var _p1 = model.content;
+														if (_p1.ctor === 'Just') {
+															return _elm_lang$html$Html$text(
+																_elm_lang$core$Basics$toString(_p1._0));
+														} else {
+															return _elm_lang$html$Html$text('');
+														}
+													}(),
 													_1: {ctor: '[]'}
 												}),
 											_1: {ctor: '[]'}
@@ -9561,20 +9562,22 @@ var _user$project$Main$getFileContents = function (nf) {
 	return A2(
 		_elm_lang$core$Task$attempt,
 		_user$project$Main$OnFileContent,
-		_simonh1000$file_reader$FileReader$readAsTextFile(nf.blob));
+		_simonh1000$file_reader$FileReader$readAsArrayBuffer(nf.blob));
 };
 var _user$project$Main$update = F2(
 	function (message, model) {
-		var _p1 = message;
-		switch (_p1.ctor) {
+		var _p2 = message;
+		switch (_p2.ctor) {
 			case 'OnFileContent':
-				var _p2 = _p1._0;
-				if (_p2.ctor === 'Ok') {
+				var _p3 = _p2._0;
+				if (_p3.ctor === 'Ok') {
 					return {
 						ctor: '_Tuple2',
 						_0: _elm_lang$core$Native_Utils.update(
 							model,
-							{content: _p2._0}),
+							{
+								content: _elm_lang$core$Maybe$Just(_p3._0)
+							}),
 						_1: _elm_lang$core$Platform_Cmd$none
 					};
 				} else {
@@ -9584,21 +9587,21 @@ var _user$project$Main$update = F2(
 							start: {line: 34, column: 13},
 							end: {line: 39, column: 47}
 						},
-						_p2)(
-						_elm_lang$core$Basics$toString(_p2._0));
+						_p3)(
+						_elm_lang$core$Basics$toString(_p3._0));
 				}
-			case 'Fran':
-				var _p4 = _p1._0;
-				if ((_p4.ctor === '::') && (_p4._1.ctor === '[]')) {
-					var _p5 = _p4._0;
+			case 'FileChange':
+				var _p5 = _p2._0;
+				if ((_p5.ctor === '::') && (_p5._1.ctor === '[]')) {
+					var _p6 = _p5._0;
 					return {
 						ctor: '_Tuple2',
 						_0: _elm_lang$core$Native_Utils.update(
 							model,
 							{
-								file: _elm_lang$core$Maybe$Just(_p5)
+								file: _elm_lang$core$Maybe$Just(_p6)
 							}),
-						_1: _user$project$Main$getFileContents(_p5)
+						_1: _user$project$Main$getFileContents(_p6)
 					};
 				} else {
 					return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};

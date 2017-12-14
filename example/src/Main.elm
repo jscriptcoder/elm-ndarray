@@ -10,20 +10,20 @@ import FileReader exposing (NativeFile, FileContentArrayBuffer)
 
 type alias Model =
     { file : Maybe NativeFile
-    , content : FileContentArrayBuffer
+    , content : Maybe FileContentArrayBuffer
     }
 
 
 init : Model
 init =
     { file = Nothing
-    , content = FileContentArrayBuffer
+    , content = Nothing
     }
 
 
 type Msg
     = OnFileContent (Result FileReader.Error FileContentArrayBuffer)
-    | Fran (List NativeFile)
+    | FileChange (List NativeFile)
     | NoOp
 
 
@@ -33,12 +33,12 @@ update message model =
         OnFileContent res ->
             case res of
                 Ok content ->
-                    ( { model | content = content }, Cmd.none )
+                    ( { model | content = Just content }, Cmd.none )
 
                 Err err ->
                     Debug.crash (toString err)
 
-        Fran file ->
+        FileChange file ->
             case file of
                 -- Only handling case of a single file
                 [ f ] ->
@@ -59,7 +59,7 @@ view model =
         , div []
             [ input
                 [ type_ "file"
-                , FileReader.onFileChange Fran
+                , FileReader.onFileChange FileChange
                 , multiple False
                 ]
                 []
@@ -67,8 +67,18 @@ view model =
         , case model.file of
             Just nf ->
                 div []
-                    [ span [] [ text nf.name ]
-                    , div [] [ small [] [ text model.content ] ]
+                    [ h3 [] [ text nf.name ]
+                    , textarea
+                        []
+                        [ case model.content of
+                            Just cf ->
+                                cf
+                                    |> toString
+                                    |> text
+
+                            Nothing ->
+                                text ""
+                        ]
                     ]
 
             Nothing ->
