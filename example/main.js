@@ -8371,7 +8371,11 @@ var _user$project$Main$update = F2(
 				_1: {
 					ctor: '::',
 					_0: _p1.width,
-					_1: {ctor: '[]'}
+					_1: {
+						ctor: '::',
+						_0: 4,
+						_1: {ctor: '[]'}
+					}
 				}
 			},
 			_p1.arrBuffer);
@@ -8386,7 +8390,11 @@ var _user$project$Main$init = {
 			_1: {
 				ctor: '::',
 				_0: 0,
-				_1: {ctor: '[]'}
+				_1: {
+					ctor: '::',
+					_0: 0,
+					_1: {ctor: '[]'}
+				}
 			}
 		}),
 	_1: _elm_lang$core$Platform_Cmd$none

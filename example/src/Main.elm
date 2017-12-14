@@ -31,7 +31,7 @@ type alias Model =
 
 init : ( Model, Cmd Msg )
 init =
-    ( NdArray.empty [ 0, 0 ]
+    ( NdArray.empty [ 0, 0, 0 ]
     , Cmd.none
     )
 
@@ -58,9 +58,10 @@ update msg model =
     case msg of
         OnImage data ->
             let
+                -- Shape (width, height, RGBA)
                 newModel =
                     NdArray.initialize
-                        [ data.height, data.width ]
+                        [ data.height, data.width, 4 ]
                         data.arrBuffer
             in
                 ( newModel, Cmd.none )
