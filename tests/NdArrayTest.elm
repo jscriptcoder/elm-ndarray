@@ -22,6 +22,15 @@ suite =
                     NdArray.toString nda
                         |> Expect.equal "NdArray{shape=[2,3];strides=[3,1];length=6;offset=0}"
             )
+        , test "Empty initialization"
+            (\_ ->
+                let
+                    nda =
+                        NdArray.empty
+                in
+                    NdArray.toString nda
+                        |> Expect.equal "NdArray{shape=[];strides=[];length=0;offset=0}"
+            )
         , test "Indexing"
             (\_ ->
                 let
@@ -117,21 +126,6 @@ suite =
                     NdArray.toString ndaHigh
                         |> Expect.equal "NdArray{shape=[2,3];strides=[4,1];length=6;offset=0}"
             )
-        , test "Slicing high - view"
-            (\_ ->
-                let
-                    buffer =
-                        Array.initialize 16 identity
-
-                    nda =
-                        NdArray.initialize [ 4, 4 ] buffer
-
-                    ndaHigh =
-                        NdArray.high [ 2, 3 ] nda
-                in
-                    NdArray.viewToString ndaHigh
-                        |> Expect.equal "[0,1,2,4,5,6]"
-            )
         , test "Slicing low"
             (\_ ->
                 let
@@ -146,21 +140,6 @@ suite =
                 in
                     NdArray.toString ndaLow
                         |> Expect.equal "NdArray{shape=[2,1];strides=[4,1];length=2;offset=11}"
-            )
-        , test "Slicing low - view"
-            (\_ ->
-                let
-                    buffer =
-                        Array.initialize 16 identity
-
-                    nda =
-                        NdArray.initialize [ 4, 4 ] buffer
-
-                    ndaLow =
-                        NdArray.low [ 2, 3 ] nda
-                in
-                    NdArray.viewToString ndaLow
-                        |> Expect.equal "[11,15]"
             )
         , test "Stepping"
             (\_ ->
@@ -252,6 +231,50 @@ suite =
                     NdArray.bufferToString mappedNda
                         |> Expect.equal "[0,2,4,6,8,10,12,14,16,18,20,22,24,26,28,30]"
             )
+        , test "Folding"
+            (\_ ->
+                let
+                    buffer =
+                        Array.initialize 6 identity
+
+                    nda =
+                        NdArray.initialize [ 2, 3 ] buffer
+
+                    foldedVal =
+                        NdArray.fold (\val acc -> val + acc) 0 nda
+                in
+                    Expect.equal foldedVal 15
+            )
+        , test "Slicing high - view"
+            (\_ ->
+                let
+                    buffer =
+                        Array.initialize 16 identity
+
+                    nda =
+                        NdArray.initialize [ 4, 4 ] buffer
+
+                    ndaHigh =
+                        NdArray.high [ 2, 3 ] nda
+                in
+                    NdArray.viewToString ndaHigh
+                        |> Expect.equal "[0,1,2,4,5,6]"
+            )
+        , test "Slicing low - view"
+            (\_ ->
+                let
+                    buffer =
+                        Array.initialize 16 identity
+
+                    nda =
+                        NdArray.initialize [ 4, 4 ] buffer
+
+                    ndaLow =
+                        NdArray.low [ 2, 3 ] nda
+                in
+                    NdArray.viewToString ndaLow
+                        |> Expect.equal "[11,15]"
+            )
         , test "Slicing and Mapping"
             (\_ ->
                 let
@@ -269,19 +292,5 @@ suite =
                 in
                     NdArray.viewToString mappedNda
                         |> Expect.equal "[14,18]"
-            )
-        , test "Folding"
-            (\_ ->
-                let
-                    buffer =
-                        Array.initialize 6 identity
-
-                    nda =
-                        NdArray.initialize [ 2, 3 ] buffer
-
-                    foldedVal =
-                        NdArray.fold (\val acc -> val + acc) 0 nda
-                in
-                    Expect.equal foldedVal 15
             )
         ]

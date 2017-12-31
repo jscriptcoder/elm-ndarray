@@ -7983,14 +7983,19 @@ var _user$project$NdArray$permuteValues = F3(
 		}
 	});
 var _user$project$NdArray$shapeToLength = function (shape) {
-	return A3(
-		_elm_lang$core$List$foldr,
-		F2(
-			function (x, y) {
-				return x * y;
-			}),
-		1,
-		shape);
+	var _p8 = shape;
+	if (_p8.ctor === '[]') {
+		return 0;
+	} else {
+		return A3(
+			_elm_lang$core$List$foldr,
+			F2(
+				function (x, y) {
+					return x * y;
+				}),
+			1,
+			shape);
+	}
 };
 var _user$project$NdArray$calculateStrides = function (shape) {
 	var acc = A3(
@@ -8043,9 +8048,9 @@ var _user$project$NdArray$pick = F2(
 			_elm_lang$core$List$map2,
 			F2(
 				function (pick, stride) {
-					var _p8 = pick;
-					if (_p8.ctor === 'Just') {
-						return nda.offset + (stride * _p8._0);
+					var _p9 = pick;
+					if (_p9.ctor === 'Just') {
+						return nda.offset + (stride * _p9._0);
 					} else {
 						return 0;
 					}
@@ -8060,13 +8065,13 @@ var _user$project$NdArray$pick = F2(
 				}),
 			nda.offset,
 			sumOffset);
-		var _p9 = _elm_lang$core$List$unzip(
+		var _p10 = _elm_lang$core$List$unzip(
 			A4(
 				_elm_lang$core$List$map3,
 				F3(
 					function (pick, stride, dim) {
-						var _p10 = pick;
-						if (_p10.ctor === 'Just') {
+						var _p11 = pick;
+						if (_p11.ctor === 'Just') {
 							return {ctor: '_Tuple2', _0: 0, _1: 0};
 						} else {
 							return {ctor: '_Tuple2', _0: dim, _1: stride};
@@ -8075,8 +8080,8 @@ var _user$project$NdArray$pick = F2(
 				picks,
 				nda.strides,
 				nda.shape));
-		var auxShape = _p9._0;
-		var auxStrides = _p9._1;
+		var auxShape = _p10._0;
+		var auxStrides = _p10._1;
 		var newShape = A2(
 			_elm_lang$core$List$filter,
 			function (dim) {
@@ -8113,7 +8118,7 @@ var _user$project$NdArray$step = F2(
 				}),
 			nda.offset,
 			sumOffset);
-		var _p11 = _elm_lang$core$List$unzip(
+		var _p12 = _elm_lang$core$List$unzip(
 			A4(
 				_elm_lang$core$List$map3,
 				F3(
@@ -8134,8 +8139,8 @@ var _user$project$NdArray$step = F2(
 				steps,
 				nda.strides,
 				nda.shape));
-		var newShape = _p11._0;
-		var newStrides = _p11._1;
+		var newShape = _p12._0;
+		var newStrides = _p12._1;
 		var newLength = _user$project$NdArray$shapeToLength(newShape);
 		return _elm_lang$core$Native_Utils.update(
 			nda,
@@ -8216,20 +8221,20 @@ var _user$project$NdArray$foldWithLocation = F4(
 		foldWithLocation:
 		while (true) {
 			var maybeVal = A2(_user$project$NdArray$get, loc, nda);
-			var _p12 = maybeVal;
-			if (_p12.ctor === 'Just') {
+			var _p13 = maybeVal;
+			if (_p13.ctor === 'Just') {
 				var maybeNextLoc = A2(_user$project$NdArray$nextLocation, loc, nda.shape);
-				var newVal = A2(fn, _p12._0, acc);
-				var _p13 = maybeNextLoc;
-				if (_p13.ctor === 'Just') {
-					var _v14 = fn,
-						_v15 = newVal,
-						_v16 = _p13._0,
-						_v17 = nda;
-					fn = _v14;
-					acc = _v15;
-					loc = _v16;
-					nda = _v17;
+				var newVal = A2(fn, _p13._0, acc);
+				var _p14 = maybeNextLoc;
+				if (_p14.ctor === 'Just') {
+					var _v15 = fn,
+						_v16 = newVal,
+						_v17 = _p14._0,
+						_v18 = nda;
+					fn = _v15;
+					acc = _v16;
+					loc = _v17;
+					nda = _v18;
 					continue foldWithLocation;
 				} else {
 					return newVal;
@@ -8254,18 +8259,6 @@ var _user$project$NdArray$set = F3(
 				buffer: A3(_elm_lang$core$Array$set, idx, value, nda.buffer)
 			});
 	});
-var _user$project$NdArray$viewToString = function (nda) {
-	return _elm_lang$core$Basics$toString(
-		_elm_lang$core$List$reverse(
-			A3(
-				_user$project$NdArray$fold,
-				F2(
-					function (val, acc) {
-						return {ctor: '::', _0: val, _1: acc};
-					}),
-				{ctor: '[]'},
-				nda)));
-};
 var _user$project$NdArray$bufferToString = function (nda) {
 	return _elm_lang$core$Basics$toString(
 		_elm_lang$core$Array$toList(nda.buffer));
@@ -8304,29 +8297,30 @@ var _user$project$NdArray$initialize = F2(
 		var strides = _user$project$NdArray$calculateStrides(shape);
 		return {shape: shape, strides: strides, length: length, offset: offset, buffer: buffer};
 	});
-var _user$project$NdArray$empty = function (shape) {
-	return A2(_user$project$NdArray$initialize, shape, _elm_lang$core$Array$empty);
-};
+var _user$project$NdArray$empty = A2(
+	_user$project$NdArray$initialize,
+	{ctor: '[]'},
+	_elm_lang$core$Array$empty);
 var _user$project$NdArray$mapWithLocation = F4(
 	function (fn, loc, buffer, nda) {
 		mapWithLocation:
 		while (true) {
 			var maybeVal = A2(_user$project$NdArray$get, loc, nda);
-			var _p14 = maybeVal;
-			if (_p14.ctor === 'Just') {
+			var _p15 = maybeVal;
+			if (_p15.ctor === 'Just') {
 				var maybeNextLoc = A2(_user$project$NdArray$nextLocation, loc, nda.shape);
-				var newVal = fn(_p14._0);
+				var newVal = fn(_p15._0);
 				var newBuffer = A2(_elm_lang$core$Array$push, newVal, buffer);
-				var _p15 = maybeNextLoc;
-				if (_p15.ctor === 'Just') {
-					var _v20 = fn,
-						_v21 = _p15._0,
-						_v22 = newBuffer,
-						_v23 = nda;
-					fn = _v20;
-					loc = _v21;
-					buffer = _v22;
-					nda = _v23;
+				var _p16 = maybeNextLoc;
+				if (_p16.ctor === 'Just') {
+					var _v21 = fn,
+						_v22 = _p16._0,
+						_v23 = newBuffer,
+						_v24 = nda;
+					fn = _v21;
+					loc = _v22;
+					buffer = _v23;
+					nda = _v24;
 					continue mapWithLocation;
 				} else {
 					return A2(_user$project$NdArray$initialize, nda.shape, newBuffer);
@@ -8343,64 +8337,21 @@ var _user$project$NdArray$map = F2(
 		var initialLoc = A2(_elm_lang$core$List$repeat, ndim, 0);
 		return A4(_user$project$NdArray$mapWithLocation, fn, initialLoc, buffer, nda);
 	});
+var _user$project$NdArray$view = function (nda) {
+	return A2(_user$project$NdArray$map, _elm_lang$core$Basics$identity, nda);
+};
+var _user$project$NdArray$viewToString = function (nda) {
+	var viewNda = _user$project$NdArray$view(nda);
+	return _user$project$NdArray$bufferToString(viewNda);
+};
 var _user$project$NdArray$NdArray = F5(
 	function (a, b, c, d, e) {
 		return {shape: a, buffer: b, length: c, offset: d, strides: e};
 	});
 
-var _user$project$Main$view = function (model) {
-	return A2(
-		_elm_lang$html$Html$div,
-		{ctor: '[]'},
-		{
-			ctor: '::',
-			_0: _elm_lang$html$Html$text(
-				_user$project$NdArray$toString(model)),
-			_1: {ctor: '[]'}
-		});
-};
-var _user$project$Main$update = F2(
-	function (msg, model) {
-		var _p0 = msg;
-		var _p1 = _p0._0;
-		var newModel = A2(
-			_user$project$NdArray$initialize,
-			{
-				ctor: '::',
-				_0: _p1.height,
-				_1: {
-					ctor: '::',
-					_0: _p1.width,
-					_1: {
-						ctor: '::',
-						_0: 4,
-						_1: {ctor: '[]'}
-					}
-				}
-			},
-			_p1.arrBuffer);
-		return {ctor: '_Tuple2', _0: newModel, _1: _elm_lang$core$Platform_Cmd$none};
-	});
-var _user$project$Main$init = {
-	ctor: '_Tuple2',
-	_0: _user$project$NdArray$empty(
-		{
-			ctor: '::',
-			_0: 0,
-			_1: {
-				ctor: '::',
-				_0: 0,
-				_1: {
-					ctor: '::',
-					_0: 0,
-					_1: {ctor: '[]'}
-				}
-			}
-		}),
-	_1: _elm_lang$core$Platform_Cmd$none
-};
-var _user$project$Main$jsArray = _elm_lang$core$Native_Platform.incomingPort(
-	'jsArray',
+var _user$project$Main$init = {ctor: '_Tuple2', _0: _user$project$NdArray$empty, _1: _elm_lang$core$Platform_Cmd$none};
+var _user$project$Main$js2elm = _elm_lang$core$Native_Platform.incomingPort(
+	'js2elm',
 	A2(
 		_elm_lang$core$Json_Decode$andThen,
 		function (arrBuffer) {
@@ -8421,15 +8372,122 @@ var _user$project$Main$jsArray = _elm_lang$core$Native_Platform.incomingPort(
 			_elm_lang$core$Json_Decode$field,
 			'arrBuffer',
 			_elm_lang$core$Json_Decode$array(_elm_lang$core$Json_Decode$int))));
+var _user$project$Main$elm2js = _elm_lang$core$Native_Platform.outgoingPort(
+	'elm2js',
+	function (v) {
+		return {
+			arrBuffer: _elm_lang$core$Native_Array.toJSArray(v.arrBuffer).map(
+				function (v) {
+					return v;
+				}),
+			width: v.width,
+			height: v.height
+		};
+	});
+var _user$project$Main$update = F2(
+	function (msg, model) {
+		var _p0 = msg;
+		if (_p0.ctor === 'OnImage') {
+			var _p1 = _p0._0;
+			var newModel = A2(
+				_user$project$NdArray$initialize,
+				{
+					ctor: '::',
+					_0: _p1.height,
+					_1: {
+						ctor: '::',
+						_0: _p1.width,
+						_1: {
+							ctor: '::',
+							_0: 4,
+							_1: {ctor: '[]'}
+						}
+					}
+				},
+				_p1.arrBuffer);
+			return {ctor: '_Tuple2', _0: newModel, _1: _elm_lang$core$Platform_Cmd$none};
+		} else {
+			var highNda = A2(
+				_user$project$NdArray$high,
+				{
+					ctor: '::',
+					_0: 200,
+					_1: {
+						ctor: '::',
+						_0: 200,
+						_1: {
+							ctor: '::',
+							_0: 4,
+							_1: {ctor: '[]'}
+						}
+					}
+				},
+				model);
+			var lowNda = A2(
+				_user$project$NdArray$low,
+				{
+					ctor: '::',
+					_0: 100,
+					_1: {
+						ctor: '::',
+						_0: 100,
+						_1: {ctor: '[]'}
+					}
+				},
+				highNda);
+			var viewNda = _user$project$NdArray$view(lowNda);
+			var arrBuffer = viewNda.buffer;
+			return {
+				ctor: '_Tuple2',
+				_0: model,
+				_1: _user$project$Main$elm2js(
+					{arrBuffer: arrBuffer, width: 100, height: 100})
+			};
+		}
+	});
 var _user$project$Main$Data = F3(
 	function (a, b, c) {
 		return {arrBuffer: a, width: b, height: c};
 	});
+var _user$project$Main$Process = {ctor: 'Process'};
+var _user$project$Main$view = function (model) {
+	return A2(
+		_elm_lang$html$Html$div,
+		{ctor: '[]'},
+		{
+			ctor: '::',
+			_0: A2(
+				_elm_lang$html$Html$div,
+				{ctor: '[]'},
+				{
+					ctor: '::',
+					_0: _elm_lang$html$Html$text(
+						_user$project$NdArray$toString(model)),
+					_1: {ctor: '[]'}
+				}),
+			_1: {
+				ctor: '::',
+				_0: A2(
+					_elm_lang$html$Html$button,
+					{
+						ctor: '::',
+						_0: _elm_lang$html$Html_Events$onClick(_user$project$Main$Process),
+						_1: {ctor: '[]'}
+					},
+					{
+						ctor: '::',
+						_0: _elm_lang$html$Html$text('Process'),
+						_1: {ctor: '[]'}
+					}),
+				_1: {ctor: '[]'}
+			}
+		});
+};
 var _user$project$Main$OnImage = function (a) {
 	return {ctor: 'OnImage', _0: a};
 };
 var _user$project$Main$subscriptions = function (model) {
-	return _user$project$Main$jsArray(_user$project$Main$OnImage);
+	return _user$project$Main$js2elm(_user$project$Main$OnImage);
 };
 var _user$project$Main$main = _elm_lang$html$Html$program(
 	{init: _user$project$Main$init, view: _user$project$Main$view, update: _user$project$Main$update, subscriptions: _user$project$Main$subscriptions})();

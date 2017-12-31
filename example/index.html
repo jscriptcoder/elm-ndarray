@@ -10,30 +10,32 @@
 <body>
     <input id="file-input" type="file">
     <div id="main"></div>
+    <canvas id="original"></canvas>
+    <canvas id="ndarray"></canvas>
     <script src="main.js"></script>
     <script>
       const $main = document.getElementById('main');
-      const app = Elm.Main.embed($main);
       const $fileInput = document.getElementById('file-input');
+      const $originalCanvas = document.getElementById('original');
+      const $ndarrayCanvas = document.getElementById('ndarray');
+
+      const app = Elm.Main.embed($main);
 
       $fileInput.addEventListener('change', (event) => {
         const file = $fileInput.files[0];
         if (file) {
-          const canvas = document.createElement('canvas');
           const img = new Image();
           img.onload = () => {
-            canvas.width = img.width;
-            canvas.height = img.height;
+            $originalCanvas.width = img.width;
+            $originalCanvas.height = img.height;
 
-            const ctx = canvas.getContext('2d');
+            const ctx = $originalCanvas.getContext('2d');
             ctx.drawImage(img, 0, 0);
 
             const data = ctx.getImageData(0, 0, img.width, img.height);
             const arrBuffer = Array.from(data.data);
 
-            console.log(arrBuffer);
-
-            app.ports.jsArray.send({
+            app.ports.js2elm.send({
               arrBuffer,
               width: img.width,
               height: img.height
@@ -41,6 +43,16 @@
           };
           img.src = URL.createObjectURL(file);
         }
+      });
+
+      app.ports.elm2js.subscribe(function(data) {
+        console.log(data);
+        const buffer = new Uint8ClampedArray(data.arrBuffer);
+        $ndarrayCanvas.width = data.width;
+        $ndarrayCanvas.height = data.height;
+        const ctx = $ndarrayCanvas.getContext('2d');
+        const imageData = new ImageData(buffer, data.width, data.height);
+        ctx.putImageData(imageData, 0, 0);
       });
     </script>
 </body>

@@ -19,6 +19,7 @@ type alias Data =
 
 type Msg
     = OnImage Data
+    | Process
 
 
 
@@ -31,7 +32,7 @@ type alias Model =
 
 init : ( Model, Cmd Msg )
 init =
-    ( NdArray.empty [ 0, 0, 0 ]
+    ( NdArray.empty
     , Cmd.none
     )
 
@@ -66,6 +67,28 @@ update msg model =
             in
                 ( newModel, Cmd.none )
 
+        Process ->
+            let
+                highNda =
+                    NdArray.high [ 200, 200, 4 ] model
+
+                lowNda =
+                    NdArray.low [ 100, 100, 4 ] highNda
+
+                viewNda =
+                    NdArray.view lowNda
+
+                arrBuffer =
+                    viewNda.buffer
+            in
+                ( model
+                , elm2js <|
+                    { arrBuffer = arrBuffer
+                    , width = 100
+                    , height = 100
+                    }
+                )
+
 
 
 -- VIEW
@@ -74,16 +97,21 @@ update msg model =
 view : Model -> Html Msg
 view model =
     div []
-        [ text (NdArray.toString model) ]
+        [ div [] [ text (NdArray.toString model) ]
+        , button [ onClick Process ] [ text "Process" ]
+        ]
 
 
 
 -- SUBSCRIPTIONS
 
 
-port jsArray : (Data -> msg) -> Sub msg
+port js2elm : (Data -> msg) -> Sub msg
+
+
+port elm2js : Data -> Cmd msg
 
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    jsArray OnImage
+    js2elm OnImage

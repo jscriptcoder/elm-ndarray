@@ -6,12 +6,14 @@ module NdArray
         , Strides
         , NdArray
         , initialize
+        , empty
         , toString
         , bufferToString
+        , view
         , viewToString
+        , index
         , get
         , set
-        , index
         , high
         , low
         , step
@@ -79,6 +81,15 @@ initialize shape buffer =
 {- TODO -}
 
 
+empty : NdArray a
+empty =
+    initialize [] Array.empty
+
+
+
+{- TODO -}
+
+
 toString : NdArray a -> String
 toString nda =
     "NdArray{shape="
@@ -99,17 +110,6 @@ toString nda =
 bufferToString : NdArray a -> String
 bufferToString nda =
     Basics.toString <| Array.toList nda.buffer
-
-
-
-{- TODO -}
-
-
-viewToString : NdArray a -> String
-viewToString nda =
-    fold (\val acc -> val :: acc) [] nda
-        |> List.reverse
-        |> Basics.toString
 
 
 
@@ -418,6 +418,28 @@ fold fn initVal nda =
 
 
 
+{- TODO -}
+
+
+view : NdArray a -> NdArray a
+view nda =
+    map Basics.identity nda
+
+
+
+{- TODO -}
+
+
+viewToString : NdArray a -> String
+viewToString nda =
+    let
+        viewNda =
+            view nda
+    in
+        bufferToString viewNda
+
+
+
 -- Helpers --
 
 
@@ -442,7 +464,12 @@ calculateStrides shape =
 
 shapeToLength : Shape -> Int
 shapeToLength shape =
-    List.foldr (*) 1 shape
+    case shape of
+        [] ->
+            0
+
+        _ ->
+            List.foldr (*) 1 shape
 
 
 permuteValues indexes resultList arrList =
