@@ -73,7 +73,7 @@ update msg model =
                     NdArray.high [ 200, 200, 4 ] model
 
                 lowNda =
-                    NdArray.low [ 100, 100, 4 ] highNda
+                    NdArray.low [ 100, 100, 0 ] model
 
                 viewNda =
                     NdArray.view lowNda
@@ -84,8 +84,8 @@ update msg model =
                 ( model
                 , elm2js <|
                     { arrBuffer = arrBuffer
-                    , width = 100
-                    , height = 100
+                    , width = 173
+                    , height = 173
                     }
                 )
 

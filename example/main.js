@@ -8407,6 +8407,24 @@ var _user$project$Main$update = F2(
 				_p1.arrBuffer);
 			return {ctor: '_Tuple2', _0: newModel, _1: _elm_lang$core$Platform_Cmd$none};
 		} else {
+			var lowNda = A2(
+				_user$project$NdArray$low,
+				{
+					ctor: '::',
+					_0: 100,
+					_1: {
+						ctor: '::',
+						_0: 100,
+						_1: {
+							ctor: '::',
+							_0: 0,
+							_1: {ctor: '[]'}
+						}
+					}
+				},
+				model);
+			var viewNda = _user$project$NdArray$view(lowNda);
+			var arrBuffer = viewNda.buffer;
 			var highNda = A2(
 				_user$project$NdArray$high,
 				{
@@ -8423,25 +8441,11 @@ var _user$project$Main$update = F2(
 					}
 				},
 				model);
-			var lowNda = A2(
-				_user$project$NdArray$low,
-				{
-					ctor: '::',
-					_0: 100,
-					_1: {
-						ctor: '::',
-						_0: 100,
-						_1: {ctor: '[]'}
-					}
-				},
-				highNda);
-			var viewNda = _user$project$NdArray$view(lowNda);
-			var arrBuffer = viewNda.buffer;
 			return {
 				ctor: '_Tuple2',
 				_0: model,
 				_1: _user$project$Main$elm2js(
-					{arrBuffer: arrBuffer, width: 100, height: 100})
+					{arrBuffer: arrBuffer, width: 173, height: 173})
 			};
 		}
 	});

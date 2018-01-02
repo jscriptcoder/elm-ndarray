@@ -9,8 +9,6 @@ module NdArray
         , empty
         , toString
         , bufferToString
-        , view
-        , viewToString
         , index
         , get
         , set
@@ -22,28 +20,80 @@ module NdArray
         , transpose
         , map
         , fold
+        , view
+        , viewToString
         )
+
+{-| A NdArray provides a higher dimensional views of 1D arrays. This is a port
+of [scijs/ndarray](https://github.com/scijs/ndarray) by Mikola Lysenko.
+
+
+# Types and constructors
+
+@docs Location, Shape, Strides, Buffer, NdArray
+
+
+# Creating NdArrays
+
+@docs initialize, empty
+
+-}
 
 import Array exposing (..)
 import List exposing (..)
 
 
+{-| List of Int representing the location within the [NdArray](#NdArray).
+
+    let
+        nda =
+            initialize [2, 3] [1, 2, 3, 4, 5, 6]
+
+        location =
+            [1, 0]
+    in
+        get location nda == 3
+
+-}
 type alias Location =
     List Int
 
 
+{-| List of Int representing the dimensions of the [NdArray](#NdArray).
+
+    [4] -- 1D vector
+    [3, 4] -- 3×4 matrix
+    [2, 1, 3] -- 3 dimensional matrix, 2×1×3
+
+-}
 type alias Shape =
     List Int
 
 
-type alias Buffer a =
-    Array a
+{-| List of Int representing the stride for each dimension.
 
+    let
+        nda =
+            initialize [2, 2, 2] [1, 2, 3, 4, 5, 6, 7, 8]
+    in
+        nda.strides == [4, 2, 1]
 
+-}
 type alias Strides =
     List Int
 
 
+{-| Underlying one dimensional array
+TODO: TypedArray?
+-}
+type alias Buffer a =
+    Array a
+
+
+{-| Multidimensional container of items of the same type.
+The number of dimensions and items in an NdArray is defined by its
+[Shape](#Shape)
+-}
 type alias NdArray a =
     { shape : Shape
     , buffer : Buffer a
@@ -53,10 +103,19 @@ type alias NdArray a =
     }
 
 
+{-| Initialize a [NdArray](#NdArray) given a [Shape](#Shape) and a [Buffer](#Buffer).
+By default the offset to start the view is 0. Strides and length are
+calculated based on the [Shape](#Shape)
 
-{- TODO -}
+    initialize [2, 3] [1, 2, 3, 4, 5, 6]
+    --> { shape = [2, 3]
+        , buffer = [1, 2, 3, 4, 5, 6]
+        , length = 6
+        , offset = 0
+        , strides = [3, 1]
+        }
 
-
+-}
 initialize : Shape -> Buffer a -> NdArray a
 initialize shape buffer =
     let
@@ -77,19 +136,32 @@ initialize shape buffer =
         }
 
 
+{-| Creates an empty [NdArray](#NdArray).
 
-{- TODO -}
+    empty
+    --> { shape = []
+        , buffer = []
+        , length = 0
+        , offset = 0
+        , strides = []
+        }
 
-
+-}
 empty : NdArray a
 empty =
     initialize [] Array.empty
 
 
+{-| Turns a [NdArray](#NdArray) into a string. The [Buffer](#Buffer) is left out.
 
-{- TODO -}
+    let
+        nda = initialize [2, 3][1, 2, 3, 4, 5, 6]
 
+    in
+        toString nda
+        --> "NdArray{shape=[2,3];strides=[3,1];length=6;offset=0}"
 
+-}
 toString : NdArray a -> String
 toString nda =
     "NdArray{shape="
@@ -103,19 +175,33 @@ toString nda =
         ++ "}"
 
 
+{-| String representation of the [Buffer](#Buffer). For debugging purposes.
 
-{- TODO -}
+    let
+        nda = initialize [2, 3][1, 2, 3, 4, 5, 6]
 
+    in
+        bufferToString nda
+        --> "[1,2,3,4,5,6]"
 
+-}
 bufferToString : NdArray a -> String
 bufferToString nda =
     Basics.toString <| Array.toList nda.buffer
 
 
+{-| Returns the index of the cell in the underlying [NdArray](#NdArray).
 
-{- TODO -}
+    let
+        nda =
+            initialize [2, 3] [1, 2, 3, 4, 5, 6]
 
+        location =
+            [1, 0]
+    in
+        index location nda == 2
 
+-}
 index : Location -> NdArray a -> Int
 index loc nda =
     let
@@ -128,10 +214,18 @@ index loc nda =
         List.foldl (+) nda.offset locTimesStride
 
 
+{-| Returns an element given the [Location](#Location).
 
-{- TODO -}
+    let
+        nda =
+            initialize [2, 3] [1, 2, 3, 4, 5, 6]
 
+        location =
+            [1, 1]
+    in
+        get location nda == Just 4
 
+-}
 get : Location -> NdArray a -> Maybe a
 get loc nda =
     let
@@ -141,10 +235,19 @@ get loc nda =
         Array.get idx nda.buffer
 
 
+{-| Sets an element given the [Location](#Location).
 
-{- TODO -}
+    let
+        nda =
+            initialize [2, 3] [1, 2, 3, 4, 5, 6]
 
+        location =
+            [1, 1]
+    in
+        set location -1 nda |> bufferToString
+        --> "[1,2,3,-1,5,6]"
 
+-}
 set : Location -> a -> NdArray a -> NdArray a
 set loc value nda =
     let
@@ -154,10 +257,25 @@ set loc value nda =
         { nda | buffer = Array.set idx value nda.buffer }
 
 
+{-| This creates a shifted view of the array, truncating from the bottom-right
+corner of the [NdArray](#NdArray).
 
-{- TODO -}
+    let
+        nda = initialize [3, 4] [1, 2, ..., 12]
+        {-
+            1  2  3  4
+            5  6  7  8
+            9 10 11 12
+        -}
 
+    in
+        high [2, 3] nda
+        {-
+            1  2  3
+            5  6  7
+        -}
 
+-}
 high : Location -> NdArray a -> NdArray a
 high loc nda =
     let
@@ -181,10 +299,25 @@ high loc nda =
         }
 
 
+{-| Does dual of high, adding offset and therefore truncating from the top-left
+of the [NdArray](#NdArray).
 
-{- TODO -}
+    let
+        nda = initialize [3, 4] [1, 2, ..., 12]
+        {-
+            1  2  3  4
+            5  6  7  8
+            9 10 11 12
+        -}
 
+    in
+        low [2, 2] nda
+        {-
+             7  8
+            11 12
+        -}
 
+-}
 low : Location -> NdArray a -> NdArray a
 low loc nda =
     let
