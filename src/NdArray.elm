@@ -1,27 +1,33 @@
 module NdArray
     exposing
-        ( Location
+        ( --Types and constructors
+          Location
         , Shape
         , Buffer
         , Strides
         , NdArray
+          -- Creating
         , initialize
         , empty
+          -- Stringifying
         , toString
         , bufferToString
+        , viewToString
+          -- Reading and writing
         , index
         , get
         , set
+          -- Slicing
         , high
         , low
         , step
         , pick
+          -- Reshaping
         , reshape
         , transpose
         , map
         , fold
         , view
-        , viewToString
         )
 
 {-| A NdArray provides a higher dimensional views of 1D arrays. This is a port
@@ -33,9 +39,22 @@ of [scijs/ndarray](https://github.com/scijs/ndarray) by Mikola Lysenko.
 @docs Location, Shape, Strides, Buffer, NdArray
 
 
-# Creating NdArrays
+# Creating
 
 @docs initialize, empty
+
+
+# Stringifying
+
+@docs toString, bufferToString
+
+
+# Reading and writing
+
+@docs index, get, set
+
+
+# Slicing
 
 -}
 
@@ -188,6 +207,17 @@ toString nda =
 bufferToString : NdArray a -> String
 bufferToString nda =
     Basics.toString <| Array.toList nda.buffer
+
+
+{-| String representation of the view [Buffer](#Buffer). For debugging purposes.
+-}
+viewToString : NdArray a -> String
+viewToString nda =
+    let
+        viewNda =
+            view nda
+    in
+        bufferToString viewNda
 
 
 {-| Returns the index of the cell in the underlying [NdArray](#NdArray).
@@ -557,19 +587,6 @@ fold fn initVal nda =
 view : NdArray a -> NdArray a
 view nda =
     map Basics.identity nda
-
-
-
-{- TODO -}
-
-
-viewToString : NdArray a -> String
-viewToString nda =
-    let
-        viewNda =
-            view nda
-    in
-        bufferToString viewNda
 
 
 
